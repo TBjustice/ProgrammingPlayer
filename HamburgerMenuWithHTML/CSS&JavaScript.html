@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>CSS&JavaScript</title>
+    <script type="text/javascript">
+      var is_opened = true;
+      var divs = [];
+      function onLoad(){
+        divs.push(document.getElementById("1"));
+        divs.push(document.getElementById("2"));
+        divs.push(document.getElementById("3"));
+        onClick();
+      }
+      function onClick() {
+        if(is_opened){
+          is_opened = false;
+          divs[0].style.transform="translateY(-600%)";
+          divs[1].style.transform="scaleX(1)";
+          divs[2].style.transform="translateY(600%)";
+        }else{
+          is_opened = true;
+          divs[0].style.transform="rotate(45deg)";
+          divs[1].style.transform="scaleX(0)";
+          divs[2].style.transform="rotate(-45deg)";
+        }
+      }
+    </script>
+    <style>
+      #hamburger{
+        position: relative;
+        padding: 0px;
+        width:200px;
+        height:200px;
+        background-color:#631d57;
+      }
+      #hamburger > div{
+        position: absolute;
+        box-sizing: border-box;
+        left:12%;
+        top:48%;
+        width:76%;
+        height:4%;
+        background-color:#ffffff;
+        transition-duration: 0.7s;
+      }
+    </style>
+  </head>
+  <body onload="onLoad()">
+    <div id="hamburger" onclick="onClick()">
+      <div id="1"></div>
+      <div id="2"></div>
+      <div id="3"></div>
+    </div>
+  </body>
+</html>

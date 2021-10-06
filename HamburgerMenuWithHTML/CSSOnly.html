@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>CSS only</title>
+    <style>
+      #hamburger > input{
+        display: none;
+      }
+      #hamburger > input + div{
+        position: relative;
+        width: 200px;
+        height: 200px;
+        background-color:#631d57;
+      }
+      #hamburger > input + div > div{
+        position: absolute;
+        left:12%;
+        top:48%;
+        width:76%;
+        height:4%;
+        background-color:#ffffff;
+        transition-duration: 0.7s;
+      }
+      #hamburger > input + div > div:first-child{
+        transform: translateY(-600%);
+      }
+      #hamburger > input:checked + div > div:first-child{
+        transform: rotate(45deg);
+      }
+      #hamburger > input + div > div:first-child + div{
+        transform: scaleX(1);
+      }
+      #hamburger > input:checked + div > div:first-child + div{
+        transform: scaleX(0);
+      }
+      #hamburger > input + div > div:first-child + div + div{
+        transform: translateY(600%);
+      }
+      #hamburger > input:checked + div > div:first-child + div + div{
+        transform: rotate(-45deg);
+      }
+    </style>
+  </head>
+  <body>
+    <label id="hamburger">
+      <input type="checkbox">
+      <div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </label>
+  </body>
+</html>

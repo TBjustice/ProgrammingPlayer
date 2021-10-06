@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>JSでごり押し</title>
+    <script type="text/javascript">
+      var canvas;
+      var is_opened = true;
+      function onLoad() {
+        canvas = document.getElementById("canvas");
+        onClick();
+      }
+      function onClick() {
+        let width = canvas.width;
+        let height = canvas.height;
+        let context = canvas.getContext("2d");
+        context.clearRect(0, 0, width, height);
+        context.strokeStyle="#ffffff";
+        context.lineWidth=10;
+        context.beginPath();
+        if(is_opened){
+          is_opened = false;
+          context.moveTo(width*0.12, height*0.25);
+          context.lineTo(width*0.88, height*0.25);
+          context.moveTo(width*0.12, height*0.50);
+          context.lineTo(width*0.88, height*0.50);
+          context.moveTo(width*0.12, height*0.75);
+          context.lineTo(width*0.88, height*0.75);
+        }
+        else{
+          is_opened = true;
+          context.moveTo(width*0.12, width*0.12);
+          context.lineTo(width*0.88, width*0.88);
+          context.moveTo(width*0.12, width*0.88);
+          context.lineTo(width*0.88, width*0.12);
+        }
+        context.stroke();
+      }
+    </script>
+  </head>
+  <body onload="onLoad()">
+    <canvas id="canvas" width="200" height="200" onclick="onClick()" style="background-color:#631d57;"></canvas>
+  </body>
+</html>
