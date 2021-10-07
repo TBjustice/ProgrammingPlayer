@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Loading2</title>
+    <style>
+      .loading2{
+        position:fixed;
+        display: flex;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-top: 1px solid black;
+      }
+      .loading2 .wrapper{
+        position: relative;
+        width: 30px;
+        height: 150px;
+      }
+      .loading2 .wrapper .string{
+        position: absolute;
+        top: 0px;
+        left: 14.5px;
+        width: 1px;
+        height: 120px;
+        background-color: gray;
+      }
+      .loading2 .wrapper .circle{
+        position: absolute;
+        top: 90px;
+        left: 0px;
+        width: 30px;
+        height: 30px;
+        background-color: #64088c;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30px;
+        color: white;
+      }
+      .loading2 > div:first-child{
+        transform-origin: top center;
+        animation: LoadAnimation2_left 3s ease-out 0s infinite normal none running;
+      }
+      .loading2 > div:last-child{
+        transform-origin: top center;
+        animation: LoadAnimation2_right 3s ease-out 0s infinite normal none running;
+      }
+      @keyframes LoadAnimation2_left {
+        0%{
+          transform: rotate(0deg);
+        }
+        50%{
+          transform: rotate(0deg);
+          animation-timing-function: ease-out;
+        }
+        75%{
+          transform: rotate(30deg);
+          animation-timing-function: ease-in;
+        }
+        100%{
+          transform: rotate(0deg);
+        }
+      }
+      @keyframes LoadAnimation2_right {
+        0%{
+          transform: rotate(0deg);
+          animation-timing-function: ease-out;
+        }
+        25%{
+          transform: rotate(-30deg);
+          animation-timing-function: ease-in;
+        }
+        50%{
+          transform: rotate(0deg);
+        }
+        100%{
+          transform: rotate(0deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading2">
+      <div class="wrapper">
+        <div class="string"></div>
+        <div class="circle">L</div>
+      </div>
+      <div class="wrapper">
+        <div class="string"></div>
+        <div class="circle">o</div>
+      </div>
+      <div class="wrapper">
+        <div class="string"></div>
+        <div class="circle">a</div>
+      </div>
+      <div class="wrapper">
+        <div class="string"></div>
+        <div class="circle">d</div>
+      </div>
+      <div class="wrapper">
+        <div class="string"></div>
+        <div class="circle">i</div>
+      </div>
+      <div class="wrapper">
+        <div class="string"></div>
+        <div class="circle">n</div>
+      </div>
+      <div class="wrapper">
+        <div class="string"></div>
+        <div class="circle">g</div>
+      </div>
+    </div>
+  </body>
+</html>
