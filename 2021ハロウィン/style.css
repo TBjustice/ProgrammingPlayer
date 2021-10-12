@@ -1,0 +1,84 @@
+#background1{
+  fill: #3879f2;
+  animation: AnimationDayNightBack 10s linear infinite;
+}
+#background2{
+  fill: #1ec226;
+  animation: AnimationDayNightBack 10s linear infinite;
+}
+@keyframes AnimationDayNightBack {
+  0%{
+    filter: brightness(1.0)
+  }
+  25%{
+    animation-timing-function: cubic-bezier(1, 0, 1, 0);
+    filter: brightness(1.0)
+  }
+  50%{
+    animation-timing-function: cubic-bezier(1, 0, 1, 0);
+    filter: brightness(0.3)
+  }
+  100%{
+    filter: brightness(1.0)
+  }
+}
+
+.pumpkinbody{
+  stroke: #000000;
+  animation: AnimationDayNightPumpkinBody 10s infinite;
+}
+.pumpkinhole{
+  stroke: transparent;
+  animation: AnimationDayNightPumpkinHole 10s infinite;
+}
+.pumpkin1{
+  transform-origin: 0% 50%;
+  transform: scale(0.75);
+}
+.pumpkin2{
+  transform-origin: 0% 50%;
+  transform: scale(0.50) translateX(-50%);
+}
+.pumpkin3{
+  transform-origin: 0% 50%;
+  transform: scale(0.25) translateX(100%);
+}
+@keyframes AnimationDayNightPumpkinBody {
+  0%{
+    animation-timing-function: cubic-bezier(0, 1, 0, 1);
+    fill: #983d01;
+  }
+  25%{
+    animation-timing-function: cubic-bezier(1, 0, 1, 0);
+    fill: #f57741;
+  }
+  50%{
+    fill: #983d01;
+  }
+  100%{
+    fill: #983d01;
+  }
+}
+@keyframes AnimationDayNightPumpkinHole {
+  0%{
+    animation-timing-function: cubic-bezier(0, 1, 0, 1);
+    fill: #f1d639;
+  }
+  25%{
+    animation-timing-function: cubic-bezier(1, 0, 1, 0);
+    fill: #000000;
+  }
+  50%{
+    animation-timing-function: cubic-bezier(0, 1, 0, 1);
+    fill: #f1d639;
+    filter: none;
+  }
+  75%{
+    animation-timing-function: cubic-bezier(1, 0, 1, 0);
+    filter: drop-shadow(0 0 5px #fde766) drop-shadow(0 0 5px #ffd685);
+  }
+  100%{
+    fill: #fde766;
+    filter: none;
+  }
+}
