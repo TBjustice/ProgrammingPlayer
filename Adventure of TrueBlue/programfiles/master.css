@@ -1,0 +1,39 @@
+body{
+  margin: 0px;
+}
+
+canvas{
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+
+#MessageDiv{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #f28cef;
+  padding: 10px;
+  overflow: visible;
+}
+
+#MessageDiv h4{
+  margin: 5px;
+  margin-left: 10px;
+}
+
+#MessageDiv p{
+  margin: 5px;
+  margin-left: 20px;
+}
+
+#BTN{
+  width: 90px;
+  height: 30px;
+  border-radius: 10px;
+  line-height: 30px;
+  text-align: center;
+  user-select: none;
+  background-color: #f4ed7f;
+}

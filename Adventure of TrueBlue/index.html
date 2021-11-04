@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>AppName</title>
+    <script type="text/javascript" src="./programfiles/stageLoader.js"></script>
+    <script type="text/javascript" src="./programfiles/WebGL.js"></script>
+    <script type="text/javascript" src="./programfiles/Camera.js"></script>
+    <script type="text/javascript" src="./programfiles/GamepadManager.js"></script>
+    <script type="text/javascript" src="./programfiles/main.js"></script>
+    <link rel="stylesheet" href="./programfiles/master.css">
+  </head>
+  <body onload="onLoad()" onresize="onResize()">
+    <canvas id="canvas" width="800" height="400"></canvas>
+    <div id="MessageDiv">
+      <h1 id="messageH1">TrueBlue's Adventure!</h1>
+      <h4>Gamepad</h4>
+      <p>L-stick to move. Button-2 to jump.</p>
+      <p>R-stick, Button-5, Button-7 to move camera.</p>
+      <h4>PC</h4>
+      <p>WASD to move. Shift to jump.</p>
+      <p>Arrows, Z, X to move camera.</p>
+      <h4>Config</h4>
+      <p>Switch Camera L-R<input type="checkbox" id="LRswitch"></p>
+      <p>Switch Camera Up-Down<input type="checkbox" id="UDswitch"></p>
+      <div id="BTN" onclick="onStart()">Start!</div>
+    </div>
+  </body>
+</html>
