@@ -1,0 +1,55 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>蟲</title>
+  <script type="text/javascript" src="js/map.js"></script>
+  <script type="text/javascript" src="js/chipData.js"></script>
+  <script type="text/javascript" src="js/interact.js"></script>
+  <script type="text/javascript" src="js/spider.js"></script>
+  <script type="text/javascript" src="js/main.js"></script>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body style="margin:0px;" onload="onLoad()">
+  <div id="textInput" class="popup">
+    <h2>入力してください</h2>
+    <p><input type="text" id="text_TextInput"/><input type="button" value="OK" id="button_TextInput" onclick="textInputOk()"/></p>
+  </div>
+  <div id="yesnoInput" class="popup">
+    <h2>選択してください</h2>
+    <p>
+      <input type="button" value="yes" onclick="yesno(true)"/>
+      <input type="button" value="no" onclick="yesno(false)"/>
+    </p>
+  </div>
+  <div id="colorInput" class="popup">
+    <h2>選択してください</h2>
+    <p>
+      <input type="button" value="R" id="button_ColorInput_R" style="background-color:#ff0000;"/>
+      <input type="button" value="G" id="button_ColorInput_G" style="background-color:#00ff00;"/>
+      <input type="button" value="B" id="button_ColorInput_B" style="background-color:#0000ff;"/>
+    </p>
+  </div>
+  <div id="textMessage" class="popup" onclick="TextMessage()">
+    <h5 id="message">Message</h5>
+  </div>
+  <div id="imgMessage" class="popup" onclick="ImgMessage()">
+    <p><img id="img_imgMessage" border="0" src="" width="128" height="128" style=""></p>
+  </div>
+  <canvas id="canvas1" height="500px" width="500px"></canvas>
+  <div id="command">
+    <p id="gold">所持している金貨の枚数:0</p>
+    <p><input type="button" value="セーブ地点から再スタート" onclick="restart()"/></p>
+    <p><input type="button" value="進捗状況をリセット" onclick="doUwannaReset()"/></p>
+  </div>
+  <div id="debug">
+    <p><input type="button" value="Reset" onclick="reset(true)"/></p>
+    <p>X:<span id="X"></span></p>
+    <p>Y:<span id="Y"></span></p>
+    <p>Type:<input type="text" id="text_Type"/></span></p>
+    <input type="button" value="↓Copy↓" onclick="copyclicked()"/>
+    <p>Change to:<input type="text" id="text_Change2"/></span></p>
+    <p><input type="button" value="GetMap" onclick="outDataclicked()"/></p>
+    <textarea id="dummytextarea" rows="5" cols="20"></textarea>
+  </div>
+</body>
+</html>

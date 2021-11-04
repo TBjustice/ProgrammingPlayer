@@ -1,0 +1,45 @@
+div.popup{
+  position: fixed;
+  background-color: #dddddd;
+  top: 330px;
+  left: 50px;
+  width: 400px;
+  height: 150px;
+}
+
+div.popup h2{
+  text-align: center;
+  user-select: none;
+}
+
+div.popup h5{
+  user-select: none;
+}
+
+div.popup p{
+  text-align: center;
+  user-select: none;
+}
+
+#debug{
+  display: none;
+  background-color: #fff;
+  position: fixed;
+  top: 0px;
+  left: 500px;
+  width: 400px;
+  height: auto;
+}
+
+#command{
+  display: block;
+  position: fixed;
+  top: 0px;
+  left: 500px;
+  width: 400px;
+  height: auto;
+}
+
+#command p{
+  user-select: none;
+}
