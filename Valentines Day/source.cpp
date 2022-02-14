@@ -100,7 +100,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 		}
 		return 0;
 	case WM_PAINT:
-		buffer.Create(1920, 1080, 0);
+		buffer.Create(1920, 1080, RGB(0xFF, 0xF4, 0xE4));
 		SelectObject(buffer.hdc, GetStockObject(DC_BRUSH));
 		SetDCBrushColor(hdc, RGB(255, 0, 0));
 		for (int i = 0; i < NUMPARTICLE; ++i) {
