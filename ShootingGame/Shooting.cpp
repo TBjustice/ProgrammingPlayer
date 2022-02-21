@@ -1,5 +1,8 @@
 #include <windows.h>
+#include <winuser.h>
 #include <math.h>
+#include <time.h>
+#include <stdlib.h>
 #include "DIBSection.h"
 
 const double DEG2RAD = 3.14159265359 / 180;
@@ -30,6 +33,7 @@ int WINAPI WinMain(HINSTANCE hCurInst, HINSTANCE hPrevInst, LPSTR lpsCmdLine, in
 	HWND hWnd;
 	MSG msg;
 	BOOL bRet;
+	srand((unsigned)time(NULL));
 
 	if (!InitApp(hCurInst, "className1", WndProc)) return FALSE;
 	hWnd = CreateWindowA(
@@ -101,18 +105,18 @@ public:
 
 	void draw(DIBSection* dst) {
 		if (HP > 0) {
-			pathPoint[0] = { 2, 1 };
-			pathPoint[1] = { 5, 1 };
-			pathPoint[2] = { 5, -2 };
-			pathPoint[3] = { 5, -5 };
-			pathPoint[4] = { 0, -5 };
-			pathPoint[5] = { 0, -2 };
-			pathPoint[6] = { 0, -5 };
-			pathPoint[7] = { -5, -5 };
-			pathPoint[8] = { -5, -2 };
-			pathPoint[9] = { -5, 1 };
-			pathPoint[10] = { -2, 1 };
-			pathPoint[11] = { 0, 3 };
+			pathPoint[0] = { 3, 1 };
+			pathPoint[1] = { 7, 1 };
+			pathPoint[2] = { 7, -3 };
+			pathPoint[3] = { 7, -7 };
+			pathPoint[4] = { 0, -7 };
+			pathPoint[5] = { 0, -3 };
+			pathPoint[6] = { 0, -7 };
+			pathPoint[7] = { -7, -7 };
+			pathPoint[8] = { -7, -3 };
+			pathPoint[9] = { -7, 1 };
+			pathPoint[10] = { -3, 1 };
+			pathPoint[11] = { 0, 4 };
 			for (int i = 0; i < 12; ++i) {
 				pathPoint[i].x += x;
 				pathPoint[i].y += y;
@@ -146,8 +150,8 @@ public:
 			}
 			if (GetKeyState('S') & 0xff00) {
 				y += 2;
-				if (y > HEIGHT - 10) {
-					y = HEIGHT - 10;
+				if (y > HEIGHT - 20) {
+					y = HEIGHT - 20;
 				}
 			}
 			if (GetKeyState('W') & 0xff00) {
@@ -194,7 +198,7 @@ public:
 		if (valid) {
 			if (abs(x - character.x) < size + 4 && abs(y - character.y) < size + 4) {
 				valid = FALSE;
-				character.HP--;
+				if(character.HP > 0)character.HP--;
 			}
 		}
 	}
@@ -298,7 +302,282 @@ public:
 #define MAXSNOW 5
 Snow snow[MAXSNOW];
 
-const int MAXENEMY = MAXSLIME + MAXSNOW;
+class Eye : public Enemy {
+public:
+	double offsetx = 50;
+	int count = 0;
+	void draw(DIBSection* dst, DIBSection* image) {
+		if (HP > 0) {
+			dst->AlphaBlt(image, x, y);
+			SetDCBrushColor(dst->hdc, RGB(128, 128, 128));
+			Rectangle(dst->hdc, x, y - 10, x + 64, y);
+			SetDCBrushColor(dst->hdc, RGB(255, 0, 0));
+			Rectangle(dst->hdc, x, y - 10, x + 64 * HP / MAXHP, y);
+		}
+	}
+	void move() {
+		if (HP > 0) {
+			x = offsetx + 60 * sin(count * DEG2RAD);
+			if (count % 60 == 0) {
+				for (int i = 0; i < 10; i++) {
+					double buf = atan2(y + 32 + 40 * sin(i * 36 * DEG2RAD) - character.y, x + 32 + 40 * cos(i * 36 * DEG2RAD) - character.x);
+					setMagic(RGB(255, 255, 43), x + 32 + 40 * cos(i * 36 * DEG2RAD), y + 32 + 40 * sin(i * 36 * DEG2RAD), -4 * cos(buf), -4 * sin(buf), 4);
+				}
+			}
+			count++;
+			count %= 360;
+		}
+	}
+};
+#define MAXEYE 5
+Eye eye[MAXEYE];
+
+class Cloud : public Enemy {
+public:
+	int offsetx = 80;
+	int offsety = 65;
+	int count = 0;
+	void draw(DIBSection* dst, DIBSection* image) {
+		if (HP > 0) {
+			dst->AlphaBlt(image, x, y);
+			SetDCBrushColor(dst->hdc, RGB(128, 128, 128));
+			Rectangle(dst->hdc, x, y - 10, x + 64, y);
+			SetDCBrushColor(dst->hdc, RGB(255, 0, 0));
+			Rectangle(dst->hdc, x, y - 10, x + 64 * HP / MAXHP, y);
+		}
+	}
+	void move() {
+		if (HP > 0) {
+			x = offsetx + 80 * cos(count * 2 * DEG2RAD);
+			y = offsety + 50 * sin(count * 2 * DEG2RAD);
+			if (count % 30 == 0) {
+				setMagic(RGB(12, 12, 95), x + 32, y + 32, 0, 5, 5);
+				setMagic(RGB(12, 12, 95), x + 4, y + 32, -0.6, 5, 5);
+				setMagic(RGB(12, 12, 95), x + 60, y + 32, 0.6, 5, 5);
+			}
+			count++;
+			count %= 360;
+		}
+	}
+};
+#define MAXCLOUD 5
+Cloud cloud[MAXCLOUD];
+
+class Boss1 : public Enemy {
+public:
+	int count = 0;
+	int lastHP = 0;
+	void draw(DIBSection* dst, DIBSection* image) {
+		if (HP > 0) {
+			dst->AlphaBlt(image, x, y);
+
+			if (HP < 100) {
+				SetDCBrushColor(dst->hdc, RGB(128, 128, 128));
+				Rectangle(dst->hdc, x, y - 10, x + 64, y);
+				SetDCBrushColor(dst->hdc, RGB(255, 0, 0));
+				Rectangle(dst->hdc, x, y - 10, x + 64.0 * HP / 100, y);
+			}
+			else if (HP < 200) {
+				SetDCBrushColor(dst->hdc, RGB(255, 0, 0));
+				Rectangle(dst->hdc, x, y - 10, x + 64, y);
+				SetDCBrushColor(dst->hdc, RGB(0, 200, 0));
+				Rectangle(dst->hdc, x, y - 10, x + 64.0 * (HP - 100) / 100, y);
+			}
+			else {
+				SetDCBrushColor(dst->hdc, RGB(0, 200, 0));
+				Rectangle(dst->hdc, x, y - 10, x + 64, y);
+				SetDCBrushColor(dst->hdc, RGB(0, 255, 255));
+				Rectangle(dst->hdc, x, y - 10, x + 64.0 * (HP - 200) / 100, y);
+			}
+
+		}
+	}
+	void move() {
+		if (HP > 0) {
+			if (HP < 100) {
+				if (lastHP == 200)count = 0;
+				x = (WIDTH - 64) / 2 + 90 * sin(count * 2 * DEG2RAD);
+				y = 50 - 30 * cos(count * 3 * DEG2RAD);
+				if (count % 5 == 0) {
+					setMagic(RGB(228, 197, 228), x + 32, y + 32, 2 * cos(count * 2 * DEG2RAD), 2 * sin(count * 2 * DEG2RAD), 6);
+				}
+				if (count % 20 == 0) {
+					for (int i = 0; i < 10; i++) {
+						double buf = atan2(y + 32 + 50 * sin(i * 36 * DEG2RAD) - character.y, x + 32 + 50 * cos(i * 36 * DEG2RAD) - character.x);
+						setMagic(RGB(164, 75, 164), x + 32 + 50 * cos(i * 36 * DEG2RAD), y + 32 + 50 * sin(i * 36 * DEG2RAD), -5.5 * cos(buf), -5.5 * sin(buf), 5);
+					}
+				}
+				if (count % 40 == 0) {
+					for (int i = 0; i < 10; i++) {
+						setMagic(RGB(164, 75, 164), x + 32, y + 64, (double)(i - 5) * 0.7, 3, 6);
+					}
+				}
+				if (count % 60 == 0) {
+					for (int i = 0; i < 11; i++) {
+						setMagic(RGB(164, 75, 164), x + 32 + (i - 5) * 7, y + 64, 0, 3, 6);
+					}
+				}
+			}
+			else if (HP < 200) {
+				if (count % 5 == 0) {
+					setMagic(RGB(228, 197, 228), x + 32, y + 32, 2 * cos(count * 3 * DEG2RAD), 2 * sin(count * 3 * DEG2RAD), 6);
+				}
+				if (count % 30 == 0) {
+					for (int i = 0; i < 10; i++) {
+						double buf = atan2(y + 32 + 50 * sin(i * 36 * DEG2RAD) - character.y, x + 32 + 50 * cos(i * 36 * DEG2RAD) - character.x);
+						setMagic(RGB(164, 75, 164), x + 32 + 50 * cos(i * 36 * DEG2RAD), y + 32 + 50 * sin(i * 36 * DEG2RAD), -5.5 * cos(buf), -5.5 * sin(buf), 5);
+					}
+				}
+				if (count % 40 == 0) {
+					for (int i = 0; i < 10; i++) {
+						setMagic(RGB(164, 75, 164), x + 32, y + 64, (double)(i - 5) * 0.7, 3, 6);
+					}
+				}
+				if (count % 72 == 0) {
+					for (int i = 0; i < 11; i++) {
+						setMagic(RGB(164, 75, 164), x + 32 + (i - 5) * 7, y + 64, 0, 3, 6);
+					}
+				}
+			}
+			else {
+				if (count % 60 == 0) {
+					for (int i = 0; i < 10; i++) {
+						double buf = atan2(y + 32 + 50 * sin(i * 36 * DEG2RAD) - character.y, x + 32 + 50 * cos(i * 36 * DEG2RAD) - character.x);
+						setMagic(RGB(164, 75, 164), x + 32 + 50 * cos(i * 36 * DEG2RAD), y + 32 + 50 * sin(i * 36 * DEG2RAD), -5.5 * cos(buf), -5.5 * sin(buf), 5);
+					}
+				}
+				if (count % 40 == 0) {
+					for (int i = 0; i < 10; i++) {
+						setMagic(RGB(164, 75, 164), x + 32, y + 64, (double)(i - 5) * 0.7, 3, 6);
+					}
+				}
+				if (count % 90 == 0) {
+					for (int i = 0; i < 11; i++) {
+						setMagic(RGB(164, 75, 164), x + 32 + (i - 5) * 7, y + 64, 0, 3, 6);
+					}
+				}
+			}
+			count++;
+			count %= 360;
+			lastHP = HP;
+		}
+	}
+};
+Boss1 boss1;
+
+class Boss2 : public Enemy {
+public:
+	int count = 0;
+	int lastHP = 0;
+	HWND hWnd = NULL;
+	void draw(DIBSection* dst, DIBSection* image) {
+		if (HP > 0) {
+			dst->AlphaBlt(image, x, y);
+
+			if (HP < 100) {
+				SetDCBrushColor(dst->hdc, RGB(128, 128, 128));
+				Rectangle(dst->hdc, x, y - 10, x + 64, y);
+				SetDCBrushColor(dst->hdc, RGB(255, 0, 0));
+				Rectangle(dst->hdc, x, y - 10, x + 64.0 * HP / 100, y);
+			}
+			else if (HP < 200) {
+				SetDCBrushColor(dst->hdc, RGB(255, 0, 0));
+				Rectangle(dst->hdc, x, y - 10, x + 64, y);
+				SetDCBrushColor(dst->hdc, RGB(0, 200, 0));
+				Rectangle(dst->hdc, x, y - 10, x + 64.0 * (HP - 100) / 100, y);
+			}
+			else {
+				SetDCBrushColor(dst->hdc, RGB(0, 200, 0));
+				Rectangle(dst->hdc, x, y - 10, x + 64, y);
+				SetDCBrushColor(dst->hdc, RGB(0, 255, 255));
+				Rectangle(dst->hdc, x, y - 10, x + 64.0 * (HP - 200) / 100, y);
+			}
+
+		}
+	}
+	void move() {
+		if (HP > 0) {
+			if (HP < 100) {
+				if (count % 10 == 0) {
+					SetWindowPos(hWnd, HWND_TOP, rand() % 300, rand() % 100, 0, 0, SWP_NOSIZE | SWP_NOREPOSITION | SWP_NOREDRAW);
+				}
+				if (lastHP == 200)count = 0;
+				x = (WIDTH - 64) / 2 + 90 * sin(count * 2 * DEG2RAD);
+				y = 50 - 30 * cos(count * 3 * DEG2RAD);
+				if (count % 5 == 0) {
+					setMagic(RGB(228, 197, 228), x + 32, y + 32, 2 * cos(count * 2 * DEG2RAD), 2 * sin(count * 2 * DEG2RAD), 6);
+				}
+				if (count % 20 == 0) {
+					for (int i = 0; i < 10; i++) {
+						double buf = atan2(y + 32 + 50 * sin(i * 36 * DEG2RAD) - character.y, x + 32 + 50 * cos(i * 36 * DEG2RAD) - character.x);
+						setMagic(RGB(164, 75, 164), x + 32 + 50 * cos(i * 36 * DEG2RAD), y + 32 + 50 * sin(i * 36 * DEG2RAD), -5.5 * cos(buf), -5.5 * sin(buf), 5);
+					}
+				}
+				if (count % 40 == 0) {
+					for (int i = 0; i < 10; i++) {
+						setMagic(RGB(164, 75, 164), x + 32, y + 64, (double)(i - 5) * 0.7, 3, 6);
+					}
+				}
+				if (count % 60 == 0) {
+					for (int i = 0; i < 11; i++) {
+						setMagic(RGB(164, 75, 164), x + 32 + (i - 5) * 7, y + 64, 0, 3, 6);
+					}
+				}
+			}
+			else if (HP < 200) {
+				if (count % 20 == 0) {
+					SetWindowPos(hWnd, HWND_TOP, rand() % 300, rand() % 100, 0, 0, SWP_NOSIZE | SWP_NOREPOSITION | SWP_NOREDRAW);
+				}
+				if (count % 5 == 0) {
+					setMagic(RGB(228, 197, 228), x + 32, y + 32, 2 * cos(count * 3 * DEG2RAD), 2 * sin(count * 3 * DEG2RAD), 6);
+				}
+				if (count % 30 == 0) {
+					for (int i = 0; i < 10; i++) {
+						double buf = atan2(y + 32 + 50 * sin(i * 36 * DEG2RAD) - character.y, x + 32 + 50 * cos(i * 36 * DEG2RAD) - character.x);
+						setMagic(RGB(164, 75, 164), x + 32 + 50 * cos(i * 36 * DEG2RAD), y + 32 + 50 * sin(i * 36 * DEG2RAD), -5.5 * cos(buf), -5.5 * sin(buf), 5);
+					}
+				}
+				if (count % 40 == 0) {
+					for (int i = 0; i < 10; i++) {
+						setMagic(RGB(164, 75, 164), x + 32, y + 64, (double)(i - 5) * 0.7, 3, 6);
+					}
+				}
+				if (count % 72 == 0) {
+					for (int i = 0; i < 11; i++) {
+						setMagic(RGB(164, 75, 164), x + 32 + (i - 5) * 7, y + 64, 0, 3, 6);
+					}
+				}
+			}
+			else {
+				if (count % 30 == 0) {
+					SetWindowPos(hWnd, HWND_TOP, rand() % 300, rand() % 100, 0, 0, SWP_NOSIZE | SWP_NOREPOSITION | SWP_NOREDRAW);
+				}
+				if (count % 60 == 0) {
+					for (int i = 0; i < 10; i++) {
+						double buf = atan2(y + 32 + 50 * sin(i * 36 * DEG2RAD) - character.y, x + 32 + 50 * cos(i * 36 * DEG2RAD) - character.x);
+						setMagic(RGB(164, 75, 164), x + 32 + 50 * cos(i * 36 * DEG2RAD), y + 32 + 50 * sin(i * 36 * DEG2RAD), -5.5 * cos(buf), -5.5 * sin(buf), 5);
+					}
+				}
+				if (count % 40 == 0) {
+					for (int i = 0; i < 10; i++) {
+						setMagic(RGB(164, 75, 164), x + 32, y + 64, (double)(i - 5) * 0.7, 3, 6);
+					}
+				}
+				if (count % 90 == 0) {
+					for (int i = 0; i < 11; i++) {
+						setMagic(RGB(164, 75, 164), x + 32 + (i - 5) * 7, y + 64, 0, 3, 6);
+					}
+				}
+			}
+			count++;
+			count %= 360;
+			lastHP = HP;
+		}
+	}
+};
+Boss2 boss2;
+
+const int MAXENEMY = MAXSLIME + MAXSNOW + MAXEYE + MAXCLOUD + 2;
 Enemy* enemies[MAXENEMY];
 
 void SetStage(int level) {
@@ -317,7 +596,7 @@ void SetStage(int level) {
 			slime[i].MAXHP = 60;
 		}
 	}
-	else if (level == 2) {
+	else if (level == 4) {
 		snow[0].offsetx = 90;
 		snow[0].offsety = 75;
 		snow[1].offsetx = WIDTH / 2 - 32;
@@ -330,6 +609,73 @@ void SetStage(int level) {
 			snow[i].MAXHP = 60;
 		}
 	}
+	else if (level == 3) {
+		eye[0].offsetx = 60;
+		eye[1].offsetx = (60 + WIDTH / 2 - 32) / 2;
+		eye[2].offsetx = WIDTH / 2 - 32;
+		eye[3].offsetx = (WIDTH / 2 - 32 + WIDTH - 60 - 64) / 2;
+		eye[4].offsetx = WIDTH - 60 - 64;
+		for (int i = 0; i < 5; i++) {
+			eye[i].count = i * 36;
+			eye[i].HP = 60;
+			eye[i].MAXHP = 60;
+			eye[i].y = 15 + (i % 2) * 50;
+		}
+	}
+	else if (level == 2) {
+		cloud[0].offsetx = 90;
+		cloud[1].offsetx = (90 + WIDTH / 2 - 32) / 2;
+		cloud[2].offsetx = WIDTH / 2 - 32;
+		cloud[3].offsetx = (WIDTH / 2 - 32 + WIDTH - 90 - 64) / 2;
+		cloud[4].offsetx = WIDTH - 90 - 64;
+		for (int i = 0; i < 5; i++) {
+			cloud[i].count = i * 72;
+			cloud[i].HP = 50;
+			cloud[i].MAXHP = 50;
+		}
+	}
+	else if (level == 5) {
+		boss1.x = (WIDTH - 64) / 2;
+		boss1.y = 20;
+		boss1.HP = 300;
+		boss1.MAXHP = 300;
+	}
+	else if (level == 6) {
+		boss2.x = (WIDTH - 64) / 2;
+		boss2.y = 20;
+		boss2.HP = 300;
+		boss2.MAXHP = 300;
+	}
+}
+
+void CenterTextOut(HDC hdc, int y, LPCSTR text) {
+	SIZE size;
+	GetTextExtentPoint32A(hdc, text, strlen(text), &size);
+	TextOutA(hdc, (WIDTH - size.cx) / 2, y, text, strlen(text));
+}
+
+BOOL MessageTextOut(HDC hdc, int y, LPCSTR text, LPCSTR textsub) {
+	static int count = 0;
+	count++;
+	if (count >= strlen(text) * 2) {
+		if (count >= strlen(text) * 2 + 36) {
+			count = strlen(text) * 2;
+		}
+		if (GetKeyState(VK_RETURN) & 0xff00) {
+			count = 0;
+			return TRUE;
+		}
+		if (count - strlen(text) * 2 < 18) {
+			CenterTextOut(hdc, 250, textsub);
+		}
+		CenterTextOut(hdc, y, text);
+	}
+	else {
+		SIZE size;
+		GetTextExtentPoint32A(hdc, text, strlen(text), &size);
+		TextOutA(hdc, (WIDTH - size.cx) / 2, y, text, count / 2);
+	}
+	return FALSE;
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
@@ -338,9 +684,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	static DIBSection backbuffer;
 	static DIBSection images[6];
 	static int action = 0;
+	static int counter = 0;
+	static char textbuf[]="Stage 0";
 	switch (msg) {
 	case WM_CREATE:
-		SetTimer(hWnd, 1, 30, NULL);
+		SetTimer(hWnd, 1, 33, NULL);
 		backbuffer.Create(WIDTH, HEIGHT, RGB(213, 174, 153));
 		images[0].Load("./images/slime.bmp");
 		images[1].Load("./images/snow.bmp");
@@ -359,11 +707,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 			for (int i = 0; i < MAXSNOW; i++) {
 				enemies[j++] = &snow[i];
 			}
+			for (int i = 0; i < MAXEYE; i++) {
+				enemies[j++] = &eye[i];
+			}
+			for (int i = 0; i < MAXCLOUD; i++) {
+				enemies[j++] = &cloud[i];
+			}
+			enemies[j++] = &boss1;
+			enemies[j++] = &boss2;
 		}
+		boss2.hWnd = hWnd;
 		break;
 	case WM_TIMER:
 		if (wp == 1) {
-			if (action == 1 || action == 3 || action == 5) {
+			if (action == 1 || action == 3 || action == 5 || action == 7 || action == 9 || action == 13 || action == 31) {
 				character.move();
 				BOOL isGameOver = TRUE;
 				for (int e = 0; e < MAXENEMY; e++) {
@@ -383,29 +740,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 					}
 				}
 				if (isGameOver) {
-					action++;
-				}
-			}
-			else {
-				if (GetKeyState(VK_RETURN) & 0xff00) {
-					switch (action)
-					{
-					case 0:
-					case 2:
-					case 4:
-						SetStage(action / 2);
-						for (int i = 0; i < MAXMAGIC; i++) {
-							magic[i].valid = FALSE;
-						}
-						for (int i = 0; i < MAXATTACK; i++) {
-							attack[i].valid = FALSE;
-						}
-						character.x = WIDTH / 2;
-						character.y = HEIGHT - 30;
-						break;
-					default:
-						break;
+					for (int i = 0; i < MAXMAGIC; i++) {
+						magic[i].valid = FALSE;
 					}
+					for (int i = 0; i < MAXATTACK; i++) {
+						attack[i].valid = FALSE;
+					}
+					character.x = WIDTH / 2;
+					character.y = HEIGHT - 30;
 					action++;
 				}
 			}
@@ -418,45 +760,213 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 		SelectObject(backbuffer.hdc, GetStockObject(DC_BRUSH));
 		SelectObject(backbuffer.hdc, GetStockObject(NULL_PEN));
 
-		if (action == 1 || action == 3 || action == 5) {
-			character.draw(&backbuffer);
+		character.draw(&backbuffer);
 
+		switch (action)
+		{
+		case 0:
+			CenterTextOut(backbuffer.hdc, 280, "Use WASD to Move Your Character");
+		case 2:
+		case 4:
+		case 6:
+		case 8:
+			textbuf[6] = '0' + (char)(action / 2);
+			CenterTextOut(backbuffer.hdc, 220, textbuf);
+			CenterTextOut(backbuffer.hdc, 250, "Press Enter to Start");
+			if (GetKeyState(VK_RETURN) & 0xff00) {
+				SetStage(action / 2);
+				action++;
+			}
+			break;
+		case 10:
+			if (MessageTextOut(backbuffer.hdc, 220, "There is a boss of this underground temple behind this door.", "Press Enter to Go Inside")) {
+				action++;
+			}
+			break;
+		case 11:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "No way! How can human reach here?!", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 12:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, HEIGHT - 90, "I will tell you after I defeat you!!", "Stage 5.  Press Enter to Start")) {
+				SetStage(5);
+				action++;
+			}
+			break;
+		case 14:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "Did I...... lose......?", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 15:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "How can it be?! Who are you?! WHAT are you?!", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 16:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, HEIGHT - 90, "I am a \"Yusha\", the one who is blessed by the \"Creator\".", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 17:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, HEIGHT - 90, "\"Creator\" ordered me to defeat you, and gave me a useful skill.", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 18:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, HEIGHT - 90, "\"Restart\". This sill enables me to travel back through time when I die.", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 19:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, HEIGHT - 90, "As long as I have this skill, you won\'t defeat me.", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 20:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "HAHAHAHA...... Now I understand......", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 21:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "That's why only a human beging can defeat me......", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 22:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, HEIGHT - 90, "Yes. So, demon. Any last words?", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 23:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "Well, \"Yusha\". Do you know the side effects of the skill?", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 24:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, HEIGHT - 90, "Side effects?", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 25:
+			backbuffer.AlphaBlt(&images[5], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "\"WORLDQUAKE\"!!", "Press Enter......")) {
+				action++;
+			}
+			counter++;
+			counter %= 360;
+			if (counter % 90 == 0) {
+				SetWindowPos(hWnd, HWND_TOP, 100, 0, 0, 0, SWP_NOSIZE | SWP_NOREPOSITION | SWP_NOREDRAW);
+			}
+			else if (counter % 90 == 18) {
+				SetWindowPos(hWnd, HWND_TOP, 100, 0, 0, 0, SWP_NOSIZE | SWP_NOREPOSITION | SWP_NOREDRAW);
+			}
+			else if (counter % 90 == 36) {
+				SetWindowPos(hWnd, HWND_TOP, 100, 100, 0, 0, SWP_NOSIZE | SWP_NOREPOSITION | SWP_NOREDRAW);
+			}
+			else if (counter % 90 == 54) {
+				SetWindowPos(hWnd, HWND_TOP, 200, 0, 0, 0, SWP_NOSIZE | SWP_NOREPOSITION | SWP_NOREDRAW);
+			}
+			else if (counter % 90 == 72) {
+				SetWindowPos(hWnd, HWND_TOP, 0, 100, 0, 0, SWP_NOSIZE | SWP_NOREPOSITION | SWP_NOREDRAW);
+			}
+			break;
+		case 26:
+			backbuffer.AlphaBlt(&images[5], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, HEIGHT - 90, "What...... did you do?", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 27:
+			backbuffer.AlphaBlt(&images[5], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "\"WORLDQUAKE.\" This magic shakes the world itself.", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 28:
+			backbuffer.AlphaBlt(&images[5], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "This magic does not effect anyone in this world.", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 29:
+			backbuffer.AlphaBlt(&images[5], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "Except those who has the skill given by the \"Creator\"", "Press Enter......")) {
+				action++;
+			}
+			break;
+		case 30:
+			backbuffer.AlphaBlt(&images[5], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "You shall die \"Yusha\"......!", "Stage 6.  Press Enter to Start")) {
+				SetStage(6);
+				action++;
+			}
+			break;
+		default:
+			if (character.HP == 0) {
+				TextOutA(backbuffer.hdc, 175, 250, "Press Enter to Restart", 22);
+				if (GetKeyState(VK_RETURN) & 0xff00) {
+					character.HP = character.MAXHP;
+					for (int e = 0; e < MAXENEMY; e++) {
+						enemies[e]->HP = 0;
+					}
+					for (int i = 0; i < MAXMAGIC; i++) {
+						magic[i].valid = FALSE;
+					}
+					for (int i = 0; i < MAXATTACK; i++) {
+						attack[i].valid = FALSE;
+					}
+					action = 0;
+				}
+			}
+			boss1.draw(&backbuffer, &images[4]);
+			boss2.draw(&backbuffer, &images[5]);
 			for (int i = 0; i < MAXSLIME; i++) {
 				slime[i].draw(&backbuffer, &images[0]);
 			}
 			for (int i = 0; i < MAXSNOW; i++) {
 				snow[i].draw(&backbuffer, &images[1]);
 			}
-
+			for (int i = 0; i < MAXEYE; i++) {
+				eye[i].draw(&backbuffer, &images[2]);
+			}
+			for (int i = 0; i < MAXCLOUD; i++) {
+				cloud[i].draw(&backbuffer, &images[3]);
+			}
 			for (int i = 0; i < MAXMAGIC; i++) {
 				magic[i].draw(&backbuffer);
 			}
-
 			for (int i = 0; i < MAXATTACK; i++) {
 				attack[i].draw(&backbuffer);
 			}
-		}
-		else {
-			if (action == 0) {
-				TextOutA(backbuffer.hdc, 210, 120, "Stage 0", 7);
-				TextOutA(backbuffer.hdc, 180, 150, "Press Enter to Start", 20);
-				TextOutA(backbuffer.hdc, 120, 180, "Use WASD to Move Your Character", 31);
-			}
-			if (action == 2) {
-				TextOutA(backbuffer.hdc, 210, 120, "Stage 1", 7);
-				TextOutA(backbuffer.hdc, 180, 150, "Press Enter to Start", 20);
-			}
-			if (action == 4) {
-				TextOutA(backbuffer.hdc, 210, 120, "Stage 2", 7);
-				TextOutA(backbuffer.hdc, 180, 150, "Press Enter to Start", 20);
-			}
+			break;
 		}
 
 		hdc = BeginPaint(hWnd, &ps);
 		BitBlt(hdc, 0, 0, WIDTH, HEIGHT, backbuffer.hdc, 0, 0, SRCCOPY);
 		EndPaint(hWnd, &ps);
 		break;
+	case WM_SIZE:
+	case WM_MOVE:
+		break;
 	case WM_DESTROY:
+		for (int i = 0; i < 6; i++) {
+			images[i].Release();
+		}
 		PostQuitMessage(0);
 		break;
 	default:
