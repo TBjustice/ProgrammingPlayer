@@ -686,6 +686,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	static int action = 0;
 	static int counter = 0;
 	static char textbuf[]="Stage 0";
+	static char bufmessage[100];
 	switch (msg) {
 	case WM_CREATE:
 		SetTimer(hWnd, 1, 33, NULL);
@@ -915,6 +916,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 				SetStage(6);
 				action++;
 			}
+			break;
+		case 32:
+			backbuffer.AlphaBlt(&images[5], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "You are...... so strong......", "Press Enter......")) {
+				SetStage(6);
+				action++;
+			}
+			break;
+		case 33:
+			backbuffer.AlphaBlt(&images[4], (WIDTH - 64) / 2, 20);
+			if (MessageTextOut(backbuffer.hdc, 80, "I am glad to meet someone like you before I die.", "Press Enter......")) {
+				SetStage(6);
+				action++;
+			}
+			break;
+		case 34:
+			CenterTextOut(backbuffer.hdc, 220, "YOU WIN!! Congratulations!!");
+			wsprintfA(bufmessage, "HP    :%d / %d left.", character.HP, character.MAXHP);
+			CenterTextOut(backbuffer.hdc, 250, bufmessage);
 			break;
 		default:
 			if (character.HP == 0) {
