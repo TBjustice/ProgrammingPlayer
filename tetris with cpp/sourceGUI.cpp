@@ -3,7 +3,8 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "tetrisSystem.h"
+#include "NormalTetris.h"
+#include "Alteris.h"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -31,6 +32,8 @@ int main(void) {
 #else
 int WINAPI WinMain(HINSTANCE hCurInst, HINSTANCE hPrevInst, LPSTR lpsCmdLine, int nCmdShow) {
 #endif // !DEBUG
+	TetrisSystem::init();
+
 	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
 	HWND hWnd;
 	MSG msg;
@@ -43,8 +46,8 @@ int WINAPI WinMain(HINSTANCE hCurInst, HINSTANCE hPrevInst, LPSTR lpsCmdLine, in
 		WS_OVERLAPPEDWINDOW,
 		0,
 		0,
-		500,
-		500,
+		1080,
+		800,
 		NULL,
 		NULL,
 		hCurInst,
@@ -66,58 +69,27 @@ int WINAPI WinMain(HINSTANCE hCurInst, HINSTANCE hPrevInst, LPSTR lpsCmdLine, in
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	static PAINTSTRUCT ps;
 	static HDC hdc;
-	static TetrisSystem tetris;
-	static int count;
+	static NormalTetris tetris;
 	static HDC buffer_hdc;
 	static HBITMAP buffer_hbmp;
-	static int isGameOver = 0;
 	switch (msg) {
 	case WM_CREATE:
 		hdc = GetDC(hWnd);
 		buffer_hdc = CreateCompatibleDC(hdc);
-		buffer_hbmp = CreateCompatibleBitmap(hdc, 480, 720);
+		buffer_hbmp = CreateCompatibleBitmap(hdc, 1080, 720);
 		SelectObject(buffer_hdc, buffer_hbmp);
 		ReleaseDC(hWnd, hdc);
 
-		TetrisSystem::init();
-		tetris.clear();
-		tetris.setNextMino();
+		tetris.setup();
+		//tetris.setRow(18, "  MMMMMMMM");
+		//tetris.setRow(19, "   MMMMMMM");
+
 		SetTimer(hWnd, 1, 16, NULL);
 		break;
 	case WM_TIMER:
 		if (wp == 1) {
-			if (!isGameOver) {
-				count++;
-				count %= 8;
-				double gravity = 1;
-				if (GetAsyncKeyState(VK_DOWN) & 1) {
-					gravity = 20;
-				}
-				if (tetris.drop(gravity)) {
-					for (int r = 0; r < tetris.H; r++) {
-						printf("%d %d\n", r, tetris.sumRow(r));
-						if (tetris.sumRow(r) == tetris.W) {
-							tetris.dropRows(r);
-						}
-					}
-					if (tetris.setNextMino() == 0) {
-						isGameOver = 1;
-					}
-				}
-				if (count == 0) {
-					if (GetAsyncKeyState(VK_RIGHT) & 1) {
-						tetris.moveR();
-					}
-					else if (GetAsyncKeyState(VK_LEFT) & 1) {
-						tetris.moveL();
-					}
-					else if (GetAsyncKeyState('X') & 1) {
-						tetris.rotateCW();
-					}
-					else if (GetAsyncKeyState('Z') & 1) {
-						tetris.rotateCCW();
-					}
-				}
+			if (!tetris.isGameOver) {
+				tetris.step();
 				InvalidateRect(hWnd, NULL, FALSE);
 			}
 		}
@@ -125,7 +97,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	case WM_PAINT:
 		tetris.draw(buffer_hdc);
 		hdc = BeginPaint(hWnd, &ps);
-		BitBlt(hdc, 0, 0, 480, 720, buffer_hdc, 0, 0, SRCCOPY);
+		BitBlt(hdc, 0, 0, 1080, 720, buffer_hdc, 0, 0, SRCCOPY);
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:
